@@ -1,66 +1,61 @@
-## Foundry
+# Merkle Airdrop Starter Kit
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+The simplest no bs way to create a merkle-tree based airdrop. This starter kit comes up with the following:
 
-Foundry consists of:
+- Latest libs: Foundry, Solidity & OZ 5.0 support
+- Upgradability
+- Separation of Airdrop contract and Funds
+- Not allowed users list
+- Pausability
+- Timestamp constrained claims
+- CSV2Tree Generator and an example proof getter
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+## How to get started?
 
-## Documentation
+### Generate a Merkle Tree
 
-https://book.getfoundry.sh/
+Save your airdrop data in `generator/data/values.csv`, the format can be found in `generator/data/example.csv`.
 
-## Usage
+Run the following command to generate the merkle tree:
 
-### Build
-
-```shell
-$ forge build
+```bash
+cd generator
+bun csv2tree.ts
 ```
 
-### Test
+This will export a merkle tree (`export/tree.json`) and it's root (`export/root.txt`) in the `export/` folder
 
-```shell
-$ forge test
+### Deploy the Airdrop contract
+
+Update the values of the following in the [DeployAirdrop.s.sol](./script/DeployAirdrop.s.sol) script:
+
+- Token
+- Owner
+- Funder
+- MerkleRoot (can be found in `generator/export/root.txt`)
+- Start Time
+- End Time
+
+Once you have changed the placeholders, run the following command:
+
+```bash
+forge script script/DeployAirdrop.s.sol --broadcast --rpc-url $RPC_URL --private-key $PK --optimizer-runs 999
 ```
 
-### Format
+You should pass the RPC URL of the chain you want to deploy to and your private key as environment variables.
+**Note:** For production deployments ideally use a keystore instead of passing the private key directly.
 
-```shell
-$ forge fmt
+### How to get the merkle proof for a given address
+
+You can use the `getProof.ts` script in the `generator` folder to get the merkle proof for a given address.
+
+```bash
+cd generator
+bun getProof.ts # feel free to edit the file and change the address
 ```
 
-### Gas Snapshots
+### Run Tests
 
-```shell
-$ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
+```bash
+forge test
 ```
